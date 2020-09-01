@@ -1,14 +1,15 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import {ProviderCard} from './ProviderCard';
+import {AppContextHandle} from '../App.js';
 
 export const ProvidersBox = (props) => {
+    const {appState} = useContext(AppContextHandle);
 
-    console.log("props.prov is array:" + Array.isArray(props.prov));
 
     return (
         <div>
-            {props.prov.map(provider => {
-                 return <ProviderCard name={provider.name} />;
+            {appState.provQueryResults.map(provider => {
+                return <ProviderCard name={provider.name} />;
             })}
         </div>
     );

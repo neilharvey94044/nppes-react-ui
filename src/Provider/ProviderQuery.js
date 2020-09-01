@@ -1,7 +1,8 @@
-import React, {useReducer} from 'react';
+import React, {useReducer, useContext, useEffect} from 'react';
 import config from '../configuration.js';
+import {AppContextHandle} from '../App.js';
 
-const initialState = {
+export const initialProvQueryState = {
     zip: '',
     distance: '',
     taxonomyCode: '',
@@ -14,7 +15,7 @@ function reducer(state, { field, value}) {
     }
 }
 
-const queryProviders = async (props, zip, distance, taxonomyCode) => {
+const queryProviders = async ({zip, distance, taxonomyCode}) => {
     let queryparams = new URLSearchParams();
     queryparams.append("zipcode", zip);
     queryparams.append("distance", distance);
@@ -25,42 +26,45 @@ const queryProviders = async (props, zip, distance, taxonomyCode) => {
       };
     let queryurl = new URL(config.PROVIDER_QUERY_URL + queryparams);
     console.log(queryurl);
-    return await fetch(queryurl, options)
+    const response = await fetch(queryurl, options)
         .then(response => {
             if(!response.ok)
             {
                 throw new Error('API Invocation Failed.');
             }
-            return response.json()
-        })
-        .then(json => {
-            console.log("json is array:" + Array.isArray(json));
-            console.log(json[0].name);
-             props.setProviders(json);
+            return response;
         })
         .catch( error => {
             console.log(error);
-        })
+        });
+        console.log(response.json());
+    return response.json();
 }
 
 
 export const ProviderQuery = (props) => {
+    // manage the query parameters state here
+    const {appState, appDispatch} = useContext(AppContextHandle);
+    const [queryparms, dispatch] = useReducer(reducer, appState.provQueryParms);
+
     
-    // using the React hook "useReducer" to manage complex state
-    const [state, dispatch] = useReducer(reducer, initialState);
-    
-    const { zip, distance, taxonomyCode} = state;
-    
+    // invoked to get matching providers when query form is submitted
     const submitHandler = (event) => {
         event.preventDefault();
-        // invoke the REST API here
-        queryProviders(props, zip, distance, taxonomyCode);
+        //save query parameters
+        appDispatch({type: 'UPDATE_QUERY_PARMS', value: queryparms});
+        //get query results
+        const json = queryProviders(queryparms);
+        //save query results
+        appDispatch({type: 'UPDATE_QUERY_RESULTS', value: json});
     };
-
+    
+    // invoked when each query parameter is updated
     const onChange = (e) => {
         dispatch({field: e.target.name, value: e.target.value})
     };
-
+    
+    const { zip, distance, taxonomyCode} = queryparms;
 
     return (
         <form id="queryprovidersform" onSubmit={submitHandler}>
