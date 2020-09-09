@@ -1,10 +1,9 @@
-import React, {useReducer, useContext, useEffect, useState} from 'react';
+import React, {useReducer, useEffect, useState} from 'react';
 import config from '../configuration.js';
-import {AppContextHandle} from '../App.js';
 import {ProvidersBox} from './ProvidersBox.js';
 import {providerSearchTypes} from '../constants.js';
 
-export const initialProvQueryState = {
+export const initialProvQueryParms = {
     zip: '',
     distance: '',
     npitype: 1,
@@ -19,24 +18,20 @@ function reducer(state, { field, value}) {
     }
 }
 
-export const ProviderQuery = () => {
+export const ProviderQuery = (props) => {
     console.log("ProviderQuery");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const {appState, appDispatch} = useContext(AppContextHandle);
-    const [queryparms, dispatch] = useReducer(reducer, appState.provQueryParms);
+    const [queryparms, dispatch] = useReducer(reducer, props.provQueryParms);
     const [searchType, setSearchType] = useState(providerSearchTypes.NONE);
     const {zip, distance, npitype, taxonomyCode, npi} = queryparms;
 
-    useEffect( () => {
-        // console.log("Mount");
-        queryProviders();
-    }, [searchType, appState]);
-        // }, []);
+   
     
+    // fetch list of providers based upon query parms and type of query selected
     const queryProviders = async () => {
         setError(null);
-        let queryparams = new URLSearchParams();
+        let urlparms = new URLSearchParams();
         let queryurl = null;
         switch(searchType) {
                 case providerSearchTypes.NONE:
@@ -48,14 +43,14 @@ export const ProviderQuery = () => {
                     if(zip.length === 0 || distance.length === 0) {
                         console.log("Zip query requires zip and distance");
                         setError(Error("Zip query requires zip and distance"));
-                        appDispatch({type: 'UPDATE_QUERY_RESULTS', field: 'provQueryResults', value: []});
+                        props.provQueryResultsDispatch([]);
                         return;
                     }
-                    queryparams.append("zipcode", zip);
-                    queryparams.append("distance", distance);
-                    queryparams.append("npitype", npitype);
-                    queryparams.append("taxonomy", taxonomyCode);
-                    queryurl = new URL(config.PROVIDER_QUERY_URL + "?" + queryparams);
+                    urlparms.append("zipcode", zip);
+                    urlparms.append("distance", distance);
+                    urlparms.append("npitype", npitype);
+                    urlparms.append("taxonomy", taxonomyCode);
+                    queryurl = new URL(config.PROVIDER_QUERY_URL + "?" + urlparms);
                     break;
 
                 case providerSearchTypes.NPI:
@@ -63,7 +58,7 @@ export const ProviderQuery = () => {
                     if(npi.length < 10) {
                         console.log("NPI must be 10 digits");
                         setError(Error("NPI must be 10 digits"));
-                        appDispatch({type: 'UPDATE_QUERY_RESULTS', field: 'provQueryResults', value: []});
+                        props.provQueryResultsDispatch([]);
                     }
                     queryurl = new URL(config.PROVIDER_QUERY_URL + npi);
                     break;
@@ -94,7 +89,7 @@ export const ProviderQuery = () => {
                     console.log("Saving json");
                     console.log(json);
                     setError(null);
-                    appDispatch({type: 'UPDATE_QUERY_RESULTS', field: 'provQueryResults', value: json});
+                    props.provQueryResultsDispatch(json);
                 }
                 else {
                     throw TypeError("Invalid data from server - not JSON");
@@ -103,30 +98,35 @@ export const ProviderQuery = () => {
             .catch(err => {
                 console.log(err);
                 setError(err);
-                appDispatch({type: 'UPDATE_QUERY_RESULTS', field: 'provQueryResults', value: []});
+                props.provQueryResultsDispatch([]);
             });
         setLoading(false);
     }
 
-   
+    // when type of search or search parameters change do the fetch
+    useEffect( () => {
+        console.log("useEffect in ProviderQuery");
+        queryProviders();
+    }, [searchType, props.provQueryParms]);
+
     // invoked to get provider by Zip
     const submitZipHandler = (event) => {
         console.log("submitZipHandler");
         event.preventDefault();
-        //save query parameters
-        appDispatch({type: 'UPDATE_QUERY_PARMS', field: 'provQueryParms', value: queryparms});
-        //get query results
         setSearchType(providerSearchTypes.ZIP);
+        //Update query parm state
+        props.provQueryParmsDispatch(queryparms);
+        //get query results
         // queryProviders();
     };
     
  // invoked to get Provider by NPI
  const submitNPIHandler = (event) => {
-     console.log("submitNPIHandler");
+    console.log("submitNPIHandler");
     event.preventDefault();
     setSearchType(providerSearchTypes.NPI);
     //save query parameters
-    appDispatch({type: 'UPDATE_QUERY_PARMS', field: 'provQueryParms', value: queryparms});
+    props.provQueryParmsDispatch(queryparms);
     //get query results
     // queryProviders();
 };
@@ -156,7 +156,9 @@ export const ProviderQuery = () => {
         </div>
 
         <div>
-            <ProvidersBox loading={loading} error={error}/>
+            <ProvidersBox   loading={loading} 
+                            error={error}
+                            provQueryResults={props.provQueryResults}/>
         </div>
         </>
     )
