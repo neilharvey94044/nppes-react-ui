@@ -1,7 +1,7 @@
 import React from 'react';
 
 export const Footer = () => (
-    <div>
-        This is the footer.
+    <div className='footer'>
+        Copyright (c) Neil D. Harvey 2020.
     </div>
 )

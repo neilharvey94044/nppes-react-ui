@@ -1,5 +1,5 @@
-import React, { useContext, useReducer} from 'react';
-import {BrowserRouter as Router, Route, BrowserRouter} from 'react-router-dom';
+import React, { useReducer} from 'react';
+import {BrowserRouter as Router, Route} from 'react-router-dom';
 import './App.css';
 import {initialProvQueryState} from './Provider/ProviderQuery.js';
 import {NavBar} from './components/Navbar.js';
@@ -18,11 +18,11 @@ function reducer(state, action) {
   switch (action.type) {
     case 'UPDATE_QUERY_PARMS':
       return {...state,
-              ['provQueryParms']: action.value
+              [action.field]: action.value
             };
     case 'UPDATE_QUERY_RESULTS':
       return {...state,
-              ['provQueryResults']: action.value
+              [action.field]: action.value
             };
     default:
       return initialAppContext;
@@ -43,11 +43,11 @@ function App() {
             <ProviderPage />
           </AppContextHandle.Provider>
           </Route>
-          <Route path="/about">
-            <AboutPage />
-          </Route>
           <Route path="/providertypes">
             <ProviderTypePage />
+          </Route>
+          <Route path="/about">
+            <AboutPage />
           </Route>
       </div>
       <Footer />
