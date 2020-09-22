@@ -24,7 +24,9 @@ export const ProviderQuery = (props) => {
     const [error, setError] = useState(null);
     const [queryparms, dispatch] = useReducer(reducer, props.provQueryParms);
     const [searchType, setSearchType] = useState(providerSearchTypes.NONE);
+    const [searchCount, setSearchCount] = useState(0);
     const {zip, distance, npitype, taxonomyCode, npi} = queryparms;
+    console.log(queryparms);
 
    
     
@@ -48,8 +50,8 @@ export const ProviderQuery = (props) => {
                     }
                     urlparms.append("zipcode", zip);
                     urlparms.append("distance", distance);
-                    urlparms.append("npitype", npitype);
-                    urlparms.append("taxonomy", taxonomyCode);
+                    urlparms.append("type", npitype);
+                    urlparms.append("taxonomycode", taxonomyCode);
                     queryurl = new URL(config.PROVIDER_QUERY_URL + "?" + urlparms);
                     break;
 
@@ -107,34 +109,39 @@ export const ProviderQuery = (props) => {
     useEffect( () => {
         console.log("useEffect in ProviderQuery");
         queryProviders();
-    }, [searchType, props.provQueryParms]);
+    }, [searchCount, props.provQueryParms]);
 
     // invoked to get provider by Zip
     const submitZipHandler = (event) => {
         console.log("submitZipHandler");
         event.preventDefault();
+        setError(null);
+        setSearchCount(searchCount+1);
         setSearchType(providerSearchTypes.ZIP);
-        //Update query parm state
+        //Update query parameter state
         props.provQueryParmsDispatch(queryparms);
-        //get query results
-        // queryProviders();
     };
     
- // invoked to get Provider by NPI
- const submitNPIHandler = (event) => {
-    console.log("submitNPIHandler");
-    event.preventDefault();
-    setSearchType(providerSearchTypes.NPI);
-    //save query parameters
-    props.provQueryParmsDispatch(queryparms);
-    //get query results
-    // queryProviders();
-};
+    // invoked to get Provider by NPI
+    const submitNPIHandler = (event) => {
+        console.log("submitNPIHandler");
+        event.preventDefault();
+        setError(null);
+        setSearchCount(searchCount+1);
+        setSearchType(providerSearchTypes.NPI);
+        //Update query parameter state
+        props.provQueryParmsDispatch(queryparms);
+    };
 
     // invoked when each query parameter is updated
     const onChange = (e) => {
-        dispatch({field: e.target.name, value: e.target.value})
+        dispatch({field: e.target.name, value: e.target.value});
     };
+
+    const onToggleNPIType = (e) => {
+        console.log(e.target.checked);
+        dispatch({field: e.target.name, value: e.target.checked ? 2 : 1});
+    }
     
     return (
         <>
@@ -143,8 +150,7 @@ export const ProviderQuery = (props) => {
             <label className='f-label'>Zip<input className='f-input' name="zip" value={zip} placeholder='Enter Zip Code' onChange={onChange}></input></label>
 
             <label className='f-label'>Distance<input className='f-input' name="distance" value={distance} placeholder='Enter Distance In Miles' onChange={onChange}></input></label>
-
-            <input type="radio" id="Org" name="npitype" value={2}></input><label className='f-label'>Organization</label>
+            <input type="checkbox" id="Org" name="npitype" checked={npitype === 2 ? true:false} onChange={onToggleNPIType}></input><label className='f-label'>Organization</label>
             <label className='f-label'>Taxonomy Code<input className='f-input' name="taxonomyCode" value={taxonomyCode} placeholder='Optional' onChange={onChange}></input></label>
             <button type='submit' className="search-button">Search On Zip</button>
         </form>

@@ -132,11 +132,10 @@ nav a:hover {
   border-radius: 10px;
   width: 90vw;
   min-height: 70vh;
-  /* height: 70vh; */
   display:flex;
   flex-direction: row;
   flex-wrap:wrap;
-  align-items:center;
+  align-items:flex-start;
   justify-content:space-between;
   overflow-y: auto;
 
