@@ -1,6 +1,6 @@
 
 
-#nppes-react-ui
+# nppes-react-ui
 ### **Project:** User Interface for querying healthcare providers.
 ### **Author:** [Neil Harvey](https://www.linkedin.com/in/neil-harvey-07009a2a/)
 ### **Date:** September 2020
