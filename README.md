@@ -1,3 +1,18 @@
+
+
+#nppes-react-ui
+### **Project:** User Interface for querying healthcare providers.
+### **Author:** [Neil Harvey](https://www.linkedin.com/in/neil-harvey-07009a2a/)
+### **Date:** September 2020
+### **Tools:** Javascript/ES6
+### **What is nppes-react-ui?**
+Provides a responsive Single Page Application (SPA) for querying healthcare providers loaded by the NPPES-DATA-LOAD project and exposed over REST by the NPPES-REST-API project.
+Leverages React, React Hooks, JSX, CSS, and the fetch api.  As described below, the
+project was bootstrapped using Create React App and Node.js.  Some debugging was done using
+the VS Code Javascript debugger.
+
+---
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
